@@ -93,16 +93,16 @@ def main():
     occasion_info = get_occasion(COUNTRY_CODE, HOLIDAY_API_KEY)
     study_question = get_daily_question()
 
-    briefing = (
-        f"📅 DAILY BRIEFING: {today_str}\n\n"
-        f"🌤 Weather ({CITY}): {weather_info}\n"
-        f"🎉 Occasion/Holiday: {occasion_info}\n\n"
-        f"🧠 QUESTION OF THE DAY:\n{study_question}"
-    )
+    briefing = f"""📅 DAILY BRIEFING: {today_str}
+
+🌤 Weather ({CITY}): {weather_info}
+🎉 Occasion/Holiday: {occasion_info}
+
+🧠 QUESTION OF THE DAY:
+{study_question}"""
 
     print(briefing)
     send_telegram_message(briefing)
-
 
 if __name__ == "__main__":
     main()
