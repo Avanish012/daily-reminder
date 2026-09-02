@@ -3,6 +3,7 @@ import os
 import random
 import requests
 
+# --- कॉन्फ़िगरेशन ---
 CITY = "Delhi"
 COUNTRY_CODE = "IN"
 
@@ -11,28 +12,35 @@ HOLIDAY_API_KEY = os.getenv("HOLIDAY_API_KEY", "EtGpkue87chwT7BPmPTUffxr5yqBfUrp
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8706649605:AAFOdAerAWQ7E3vuB9gM93tq7-fpS5qFBRc")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "6125641152")
 
+# --- Study Question Bank ---
 STUDY_QUESTIONS = [
     {
         "topic": "SQL",
-        "question": "WHERE aur HAVING clause me kya antar hai?",
-        "answer": "WHERE aggregates se pehle rows filter karta hai, HAVING clause GROUP BY ke baad filter karta hai."
+        "question": "WHERE और HAVING clause में क्या अंतर है?",
+        "answer": "WHERE aggregates से पहले पंक्तियों (rows) को फ़िल्टर करता है, जबकि HAVING क्लॉज़ GROUP BY के बाद aggregate रिजल्ट्स को फ़िल्टर करता है।"
     },
     {
         "topic": "Python",
-        "question": "Python me list aur tuple me kya antar hai?",
-        "answer": "List Mutable hoti hai [], jabki Tuple Immutable hota hai ()."
+        "question": "Python में list और tuple के बीच मुख्य अंतर क्या है?",
+        "answer": "List Mutable होती है [], जबकि Tuple Immutable होता है ()।"
     },
     {
         "topic": "SQL",
-        "question": "PRIMARY KEY aur UNIQUE KEY me kya antar hai?",
-        "answer": "Primary Key me NULL nahi ho sakta, Unique Key ek NULL allow karti hai."
+        "question": "PRIMARY KEY और UNIQUE KEY में क्या अंतर है?",
+        "answer": "Primary Key में NULL मान नहीं हो सकता, जबकि Unique Key एक NULL मान की अनुमति देती है।"
     },
     {
         "topic": "Data Analytics",
-        "question": "Mean, Median aur Mode kya hain?",
-        "answer": "Mean average hai, Median middle value hai, Mode sabse zyada baar aane wala value hai."
+        "question": "Data Analytics में Mean, Median और Mode क्या हैं?",
+        "answer": "Mean औसत है, Median मध्य मान है, और Mode सबसे अधिक बार आने वाला मान है।"
+    },
+    {
+        "topic": "Python",
+        "question": "Python में deepcopy और shallowcopy में क्या अंतर है?",
+        "answer": "Shallow copy आउटर ऑब्जेक्ट कॉपी करती है, जबकि Deep copy सभी nested ऑब्जेक्ट्स की स्वतंत्र कॉपी बनाती है।"
     }
 ]
+
 
 def get_weather(city, api_key):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
@@ -43,9 +51,10 @@ def get_weather(city, api_key):
             temp = data["main"]["temp"]
             desc = data["weather"][0]["description"].capitalize()
             return f"{temp}°C, {desc}"
-        return "Weather data unavailable"
+        return f"मौसम डेटा उपलब्ध नहीं है (Error: {data.get('message', 'Unknown')})"
     except Exception as e:
-        return f"Weather error: {e}"
+        return f"मौसम नेटवर्क एरर: {e}"
+
 
 def get_occasion(country, api_key):
     today = datetime.date.today()
@@ -57,47 +66,42 @@ def get_occasion(country, api_key):
         if holidays:
             names = [h["name"] for h in holidays]
             return ", ".join(names)
-        return "No public holiday today"
+        return "आज कोई मुख्य सार्वजनिक अवकाश नहीं है"
     except Exception as e:
-        return f"Holiday error: {e}"
+        return f"त्यौहार नेटवर्क एरर: {e}"
+
 
 def get_daily_question():
     q = random.choice(STUDY_QUESTIONS)
-    return "📌 [{0}] {1}\n💡 Ans: {2}".format(q['topic'], q['question'], q['answer'])
+    return f"📌 [{q['topic']}] {q['question']}\n💡 उत्तर: {q['answer']}"
+
 
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
     try:
-        res = requests.post(url, json=payload, timeout=30)
-        print("Telegram Response Status:", res.status_code)
-        print("Telegram Response Text:", res.text)
+        response = requests.post(url, json=payload, timeout=30)
+        print("Telegram पर मैसेज सफलता से भेज दिया गया है!")
     except Exception as e:
-        print(f"Error sending message: {e}")
+        print(f"Telegram भेजने में त्रुटि: {e}")
+
 
 def main():
     today_str = datetime.date.today().strftime("%A, %B %d, %Y")
     weather_info = get_weather(CITY, WEATHER_API_KEY)
     occasion_info = get_occasion(COUNTRY_CODE, HOLIDAY_API_KEY)
-    q_text = get_daily_question()
+    study_question = get_daily_question()
 
-    lines = [
-        "📅 DAILY BRIEFING: " + today_str,
-        "",
-        "🌤 Weather (" + CITY + "): " + weather_info,
-        "🎉 Occasion/Holiday: " + occasion_info,
-        "",
-        "🧠 QUESTION OF THE DAY:",
-        q_text
-    ]
-    
-    briefing = "\n".join(lines)
+    briefing = (
+        f"📅 DAILY BRIEFING: {today_str}\n\n"
+        f"🌤 Weather ({CITY}): {weather_info}\n"
+        f"🎉 Occasion/Holiday: {occasion_info}\n\n"
+        f"🧠 QUESTION OF THE DAY:\n{study_question}"
+    )
 
-    print("--- GENERATED BRIEFING ---")
     print(briefing)
-    print("--------------------------")
-    
     send_telegram_message(briefing)
+
 
 if __name__ == "__main__":
     main()
