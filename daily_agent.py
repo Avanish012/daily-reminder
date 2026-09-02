@@ -1,14 +1,45 @@
 import datetime
+import os
+import random
 import requests
 
-# --- कॉन्फ़िगरेशन ---
+# --- कॉन्फ़िगरेशन (Environment Variables से पढ़ें) ---
 CITY = "Delhi"
 COUNTRY_CODE = "IN"
 
-WEATHER_API_KEY = "8zb140d8859e21c72d5d5956ecd2175"  # अपनी OpenWeather Key
-HOLIDAY_API_KEY = "EtGpkue87chwT7BPmPTUffxr5yqBfUrp"  # अपनी Calendarific Key
-TELEGRAM_TOKEN = "8706649605:AAFOdAerAWQ7E3vuB9gM93tq7-fpS5qFBRc"          # अपना Telegram Bot Token
-TELEGRAM_CHAT_ID = "6125641152"          # अपनी Telegram Chat ID
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "8zb140d8859e21c72d5d5956ecd2175")
+HOLIDAY_API_KEY = os.getenv("HOLIDAY_API_KEY", "EtGpkue87chwT7BPmPTUffxr5yqBfUrp")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8706649605:AAFOdAerAWQ7E3vuB9gM93tq7-fpS5qFBRc")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "6125641152")
+
+# --- Study Question Bank ---
+STUDY_QUESTIONS = [
+    {
+        "topic": "SQL",
+        "question": "WHERE और HAVING clause में क्या अंतर है?",
+        "answer": "WHERE aggregates से पहले पंक्तियों (rows) को फ़िल्टर करता है, जबकि HAVING क्लॉज़ GROUP BY के बाद aggregate रिजल्ट्स को फ़िल्टर करता है।"
+    },
+    {
+        "topic": "Python",
+        "question": "Python में list और tuple के बीच मुख्य अंतर क्या है?",
+        "answer": "List Mutable होती है [], जबकि Tuple Immutable होता है ()।"
+    },
+    {
+        "topic": "SQL",
+        "question": "PRIMARY KEY और UNIQUE KEY में क्या अंतर है?",
+        "answer": "Primary Key में NULL मान नहीं हो सकता, जबकि Unique Key एक NULL मान की अनुमति देती है।"
+    },
+    {
+        "topic": "Data Analytics",
+        "question": "Data Analytics में Mean, Median और Mode क्या हैं?",
+        "answer": "Mean औसत है, Median मध्य मान है, और Mode सबसे अधिक बार आने वाला मान है।"
+    },
+    {
+        "topic": "Python",
+        "question": "Python में deepcopy और shallowcopy में क्या अंतर है?",
+        "answer": "Shallow copy आउटर ऑब्जेक्ट कॉपी करती है, जबकि Deep copy सभी nested ऑब्जेक्ट्स की स्वतंत्र कॉपी बनाती है।"
+    }
+]
 
 
 def get_weather(city, api_key):
@@ -38,50 +69,20 @@ def get_occasion(country, api_key):
         return "आज कोई मुख्य सार्वजनिक अवकाश नहीं है"
     except Exception as e:
         return f"त्यौहार नेटवर्क एरर: {e}"
-import random
 
-# Data Analytics, Python और SQL का Question Bank
-STUDY_QUESTIONS = [
-    {
-        "topic": "SQL",
-        "question": "WHERE और HAVING clause में क्या अंतर है?",
-        "answer": "WHERE क्लॉज़ aggregates से पहले पंक्तियों (rows) को फ़िल्टर करता है, जबकि HAVING क्लॉज़ GROUP BY के बाद aggregate रिजल्ट्स को फ़िल्टर करता है।"
-    },
-    {
-        "topic": "Python",
-        "question": "Python में list और tuple के बीच मुख्य अंतर क्या है?",
-        "answer": "List Mutable (परिवर्तनशील) होती है और इसे वर्गाकार कोष्ठक [] से बनाया जाता है, जबकि Tuple Immutable (अपरिवर्तनीय) होता है और () से बनाया जाता है।"
-    },
-    {
-        "topic": "SQL",
-        "question": "PRIMARY KEY और UNIQUE KEY में मुख्य अंतर क्या है?",
-        "answer": "Primary Key टेबल में हर रिकॉर्ड को विशिष्ट रूप से पहचानती है और इसमें NULL मान नहीं हो सकता। Unique Key भी यूनिक मान सुनिश्चित करती है लेकिन एक NULL वैल्यू की अनुमति देती है।"
-    },
-    {
-        "topic": "Data Analytics",
-        "question": "Data Analytics में Mean, Median और Mode में क्या अंतर है?",
-        "answer": "Mean औसत मान है, Median डेटासेट का मध्य मान है, और Mode वह मान है जो सबसे अधिक बार दोहराया जाता है।"
-    },
-    {
-        "topic": "Python",
-        "question": "Python में `deepcopy` और `shallowcopy` में क्या अंतर है?",
-        "answer": "Shallow copy केवल आउटर ऑब्जेक्ट की नई कॉपी बनाती है (nested संदर्भ वही रहते हैं), जबकि Deep copy सभी nested ऑब्जेक्ट्स की भी पूरी तरह स्वतंत्र कॉपी बनाती है।"
-    }
-]
 
 def get_daily_question():
     q = random.choice(STUDY_QUESTIONS)
     return f"📌 [{q['topic']}] {q['question']}\n💡 उत्तर: {q['answer']}"
 
+
 def send_telegram_message(message):
-    if TELEGRAM_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN":
-        print("Telegram Bot Token सेट नहीं है।")
-        return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
     try:
-        requests.post(url, json=payload, timeout=30)
-        print("Telegram पर मैसेज सफलता से भेज दिया गया है!")
+        response = requests.post(url, json=payload, timeout=30)
+        print("Response status:", response.status_code)
+        print("Telegram response:", response.text)
     except Exception as e:
         print(f"Telegram भेजने में त्रुटि: {e}")
 
@@ -101,6 +102,7 @@ def main():
 
     print(briefing)
     send_telegram_message(briefing)
-    
+
+
 if __name__ == "__main__":
     main()
