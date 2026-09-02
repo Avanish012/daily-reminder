@@ -50,8 +50,6 @@ STUDY_QUESTIONS = [
         "answer": "Shallow copy आउटर ऑब्जेक्ट कॉपी करती है, जबकि Deep copy सभी nested ऑब्जेक्ट्स की स्वतंत्र कॉपी बनाती है।"
     }
 ]
-
-# --- 3. Helper Functions ---
 def get_weather(city, api_key):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     try:
@@ -61,9 +59,12 @@ def get_weather(city, api_key):
             temp = data["main"]["temp"]
             desc = data["weather"][0]["description"].capitalize()
             return f"{temp}°C, {desc}"
-        return "मौसम डेटा उपलब्ध नहीं है"
+        else:
+            # यह बताएगा कि API से असल में क्या एरर आ रही है
+            return f"मौसम डेटा उपलब्ध नहीं है (Error: {data.get('message', 'Unknown error')})"
     except Exception as e:
         return f"मौसम नेटवर्क एरर: {e}"
+        
 
 def get_occasion(country, api_key):
     today = datetime.date.today()
