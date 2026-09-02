@@ -8,7 +8,7 @@ on:
 
 jobs:
   run-agent:
-    runs-runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Code CheckOut
         uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirments.txt
 
       - name: Run Daily Agent Script
         run: python daily_agent.py
