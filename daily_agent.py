@@ -5,31 +5,31 @@ import requests
 CITY = "Delhi"
 COUNTRY_CODE = "IN"
 
-WEATHER_API_KEY = "82b140d8859e21c72d5d59566ecd2175"
-HOLIDAY_API_KEY = "EtGpkue87chwT7BPmPTUffxr5yqBfUrP"
-TELEGRAM_TOKEN = "8706649605:AAFOdAerAWQ7E3vuB9gM93tq7-fpS5qFBRc"
-TELEGRAM_CHAT_ID = "6125641152"
+WEATHER_API_KEY = "8zb140d8859e21c72d5d5956ecd2175"  # अपनी OpenWeather Key
+HOLIDAY_API_KEY = "EtGpkue87chwT7BPmPTUffxr5yqBfUrp"  # अपनी Calendarific Key
+TELEGRAM_TOKEN = "8706649605:AAFOdAerAWQ7E3vuB9gM93tq7-fpS5qFBRc"          # अपना Telegram Bot Token
+TELEGRAM_CHAT_ID = "6125641152"          # अपनी Telegram Chat ID
 
 
 def get_weather(city, api_key):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=30)
         data = response.json()
         if response.status_code == 200:
             temp = data["main"]["temp"]
             desc = data["weather"][0]["description"].capitalize()
             return f"{temp}°C, {desc}"
-        return "मौसम डेटा उपलब्ध नहीं है"
+        return f"मौसम डेटा उपलब्ध नहीं है (Error: {data.get('message', 'Unknown')})"
     except Exception as e:
-        return f"त्रुटि: {e}"
+        return f"मौसम नेटवर्क एरर: {e}"
 
 
 def get_occasion(country, api_key):
     today = datetime.date.today()
     url = f"https://calendarific.com/api/v2/holidays?api_key={api_key}&country={country}&year={today.year}&day={today.day}&month={today.month}"
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=30)
         data = response.json()
         holidays = data.get("response", {}).get("holidays", [])
         if holidays:
@@ -37,13 +37,20 @@ def get_occasion(country, api_key):
             return ", ".join(names)
         return "आज कोई मुख्य सार्वजनिक अवकाश नहीं है"
     except Exception as e:
-        return f"त्रुटि: {e}"
+        return f"त्यौहार नेटवर्क एरर: {e}"
 
 
 def send_telegram_message(message):
+    if TELEGRAM_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN":
+        print("Telegram Bot Token सेट नहीं है।")
+        return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-    requests.post(url, json=payload, timeout=10)
+    try:
+        requests.post(url, json=payload, timeout=30)
+        print("Telegram पर मैसेज सफलता से भेज दिया गया है!")
+    except Exception as e:
+        print(f"Telegram भेजने में त्रुटि: {e}")
 
 
 def main():
@@ -57,6 +64,7 @@ def main():
         f"🎉 Occasion/Holiday: {occasion_info}"
     )
 
+    print(briefing)
     send_telegram_message(briefing)
 
 
